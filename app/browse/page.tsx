@@ -22,7 +22,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Search, Filter, GraduationCap, TrendingUp } from "lucide-react"
 
 // Add the imports at the top of the file
-import { donate, invest } from "@/lib/blockchain"
+import { donate } from "@/lib/blockchain"
 
 // Mock student data
 const students = [
@@ -106,6 +106,19 @@ const students = [
   },
 ]
 
+// Mock blockchain functions and variables
+const getTokenBalance = async (address: string) => {
+  // Replace with actual blockchain interaction logic
+  return 1000 // Mock balance
+}
+
+const tokenPrice = 1 // 1 EDU token = $1 USD
+
+const investTokens = async (studentAddress: string, tokenAmount: string) => {
+  // Replace with actual blockchain interaction logic
+  return { success: true } // Mock success
+}
+
 export default function BrowsePage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedField, setSelectedField] = useState("all")
@@ -150,10 +163,22 @@ export default function BrowsePage() {
           alert(`Donation of $${fundingAmount} to ${selectedStudent.name} processed successfully!`)
         }
       } else {
-        const result = await invest(selectedStudent.address, fundingAmount)
+        // For investments, we now use tokens instead of direct ETH investment
+        // First check if the user has enough tokens
+        const tokenBalance = await getTokenBalance("0xUserAddress") // Replace with actual user address
+        const tokenAmount = Number.parseFloat(fundingAmount) / tokenPrice // Calculate token amount based on USD value
+
+        if (tokenBalance < tokenAmount) {
+          alert(`You don't have enough EduTokens. Please purchase tokens first.`)
+          // Redirect to token purchase page
+          window.location.href = "/dashboard/investor/tokens"
+          return
+        }
+
+        const result = await investTokens(selectedStudent.address, tokenAmount.toString())
         if (result.success) {
           alert(
-            `Investment of $${fundingAmount} to ${selectedStudent.name} processed successfully! You received ${result.tokensMinted} EduTokens.`,
+            `Investment of ${tokenAmount.toFixed(2)} EDU tokens (worth $${fundingAmount}) to ${selectedStudent.name} processed successfully!`,
           )
         }
       }

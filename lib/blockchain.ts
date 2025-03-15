@@ -92,6 +92,13 @@ export const CONTRACT_ABI = [
   },
   {
     inputs: [],
+    name: "buyTokens",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "claimRevenue",
     outputs: [],
     stateMutability: "nonpayable",
@@ -119,11 +126,30 @@ export const CONTRACT_ABI = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "getCurrentTokenPrice",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [{ internalType: "address", name: "investor", type: "address" }],
     name: "getInvestorStatus",
     outputs: [
       { internalType: "uint256", name: "totalInvested", type: "uint256" },
       { internalType: "uint256", name: "tokenBalance", type: "uint256" },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getTokenMarketMetrics",
+    outputs: [
+      { internalType: "uint256", name: "totalSupply", type: "uint256" },
+      { internalType: "uint256", name: "marketCap", type: "uint256" },
+      { internalType: "uint256", name: "circulatingSupply", type: "uint256" },
+      { internalType: "uint256", name: "dailyVolume", type: "uint256" },
     ],
     stateMutability: "view",
     type: "function",
@@ -157,6 +183,13 @@ export const CONTRACT_ABI = [
     name: "invest",
     outputs: [],
     stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "student", type: "address" }],
+    name: "investTokens",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -496,5 +529,78 @@ export function listenForEvents(eventName: string, callback: (event: any) => voi
   }
 
   return setupListener()
+}
+
+// Buy EduTokens directly (not tied to a specific student)
+export async function buyTokens(amount: string) {
+  try {
+    const contract = await getContract(true)
+    const amountInWei = ethers.utils.parseEther(amount)
+
+    const tx = await contract.buyTokens({ value: amountInWei })
+    const receipt = await tx.wait()
+
+    // Find the TokensPurchased event to get tokensMinted
+    const tokensPurchasedEvent = receipt.events?.find((e) => e.event === "TokensPurchased")
+    const tokensMinted = tokensPurchasedEvent?.args?.tokensMinted || 0
+
+    return {
+      success: true,
+      transactionHash: receipt.transactionHash,
+      tokensMinted: ethers.utils.formatEther(tokensMinted),
+    }
+  } catch (error) {
+    console.error("Error buying tokens:", error)
+    throw error
+  }
+}
+
+// Invest tokens in a student (using tokens you already own)
+export async function investTokens(studentAddress: string, tokenAmount: string) {
+  try {
+    const contract = await getContract(true)
+    const tokenAmountInWei = ethers.utils.parseEther(tokenAmount)
+
+    const tx = await contract.investTokens(studentAddress, tokenAmountInWei)
+    const receipt = await tx.wait()
+
+    return {
+      success: true,
+      transactionHash: receipt.transactionHash,
+    }
+  } catch (error) {
+    console.error("Error investing tokens:", error)
+    throw error
+  }
+}
+
+// Get current token price
+export async function getTokenPrice() {
+  try {
+    const contract = await getContract()
+    const price = await contract.getCurrentTokenPrice()
+    return Number.parseFloat(ethers.utils.formatEther(price))
+  } catch (error) {
+    console.error("Error getting token price:", error)
+    throw error
+  }
+}
+
+// Get token market metrics
+export async function getTokenMarketMetrics() {
+  try {
+    const contract = await getContract()
+    const result = await contract.getTokenMarketMetrics()
+
+    return {
+      totalSupply: Number.parseFloat(ethers.utils.formatEther(result.totalSupply)),
+      marketCap: Number.parseFloat(ethers.utils.formatEther(result.marketCap)),
+      circulatingSupply: Number.parseFloat(ethers.utils.formatEther(result.circulatingSupply)),
+      dailyVolume: Number.parseFloat(ethers.utils.formatEther(result.dailyVolume)),
+    }
+  } catch (error) {
+    console.error("Error getting token market metrics:", error)
+    throw error
+  }
 }
 
