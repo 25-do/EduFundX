@@ -1,5 +1,8 @@
-import { ethers } from "ethers"
+import { ethers, parseEther, formatEther, keccak256 } from "ethers";
 
+//const provider = new ethers.JsonRpcProvider(RPC_URL);
+//const wallet = ethers.Wallet.fromPhrase(MNEMONIC);
+//const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
 // Smart contract ABI (from your provided JSON)
 export const CONTRACT_ABI = [
   // Events
