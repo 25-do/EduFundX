@@ -175,32 +175,48 @@ export function TokenMarketplace() {
             </CardContent>
           </Card>
         </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+  <Card className="lg:col-span-2">
+    <CardHeader>
+      <CardTitle>Price History</CardTitle>
+      <CardDescription>EduToken price over the last 30 days</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <div className="h-[300px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart 
+            data={marketData.chartData}
+            margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" opacity={0.4} />
+            <XAxis 
+              dataKey="date" 
+            />
+            <YAxis 
+              tickFormatter={(value) => `$${value.toFixed(2)}`}
+              width={60}
+            />
+            <Tooltip 
+              formatter={(value) => [`$${parseFloat(value).toFixed(4)}`, "Price"]}
+              contentStyle={{ 
+                borderRadius: '8px',
+                padding: '8px 12px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                border: '1px solid #ddd'
+              }}
+            />
+            <Line
+              type="monotone"
+              dataKey="price"
+              stroke="hsl(var(--primary))"
+              strokeWidth={2}
+              dot={false}
+              activeDot={{ r: 6, stroke: "hsl(var(--primary))", strokeWidth: 2, fill: "white" }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Price History</CardTitle>
-              <CardDescription>EduToken price over the last 30 days</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={marketData.chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis domain={["auto", "auto"]} />
-                    <Tooltip formatter={(value) => [`$${value}`, "Price"]} />
-                    <Line
-                      type="monotone"
-                      dataKey="price"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth={2}
-                      dot={{ r: 3 }}
-                      activeDot={{ r: 5 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
 
               <div className="grid grid-cols-3 gap-4 mt-6">
                 <div
@@ -305,7 +321,7 @@ export function TokenMarketplace() {
                       </Button>
                       <Button
                         onClick={handlePurchaseTokens}
-                        disabled={isPurchasing || !purchaseAmount || Number.parseFloat(purchaseAmount) <= 0}
+                        disabled={isPurchasing || !purchaseAmount || Number.parseFloat(purchaseAmount) <= 1}
                       >
                         {isPurchasing ? "Processing..." : "Purchase Tokens"}
                       </Button>
@@ -313,10 +329,10 @@ export function TokenMarketplace() {
                   </DialogContent>
                 </Dialog>
 
-                <div className="pt-4">
+                <div className="pt-3">
                   <Link href="/dashboard/investor/tokens">
                     <Button variant="outline" className="w-full flex items-center justify-center">
-                      View Token Dashboard <ArrowUpRight className="ml-2 h-4 w-4" />
+                      View Token Dashboard <ArrowUpRight className="ml-1 h-4 w-4" />
                     </Button>
                   </Link>
                 </div>
